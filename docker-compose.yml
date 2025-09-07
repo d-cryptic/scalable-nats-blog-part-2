@@ -8,7 +8,7 @@ services:
     volumes:
       - ./conf/nats-server-1.conf:/etc/nats/nats-server.conf
       - ./data/nats-1:/data/jetstream
-      - ./nats-1.log:/tmp/nats-server.log
+      - ./logs/nats-1.log:/tmp/nats-server.log
     ports:
       - 4222:4222
     networks:
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./conf/nats-server-2.conf:/etc/nats/nats-server.conf
       - ./data/nats-2:/data/jetstream
-      - ./nats-2.log:/tmp/nats-server.log
+      - ./logs/nats-2.log:/tmp/nats-server.log
     ports:
       - 4223:4222
     networks:
@@ -38,7 +38,7 @@ services:
     volumes:
       - ./conf/nats-server-3.conf:/etc/nats/nats-server.conf
       - ./data/nats-3:/data/jetstream
-      - ./nats-3.log:/tmp/nats-server.log
+      - ./logs/nats-3.log:/tmp/nats-server.log
     ports:
       - 4224:4222
     networks:
@@ -53,7 +53,7 @@ services:
     volumes:
       - ./conf/nats-server-dlq.conf:/etc/nats/nats-server.conf
       - ./data/nats-dlq:/data/jetstream
-      - ./nats-dlq.log:/tmp/nats-server.log  
+      - ./logs/nats-dlq.log:/tmp/nats-server.log  
     ports:
       - 4225:4222
     networks:
