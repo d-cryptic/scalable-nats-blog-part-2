@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  nats-1:
+    image: nats:latest
+    container_name: nats-1
+    command: -c /etc/nats/nats-server.conf 
+    volumes:
+      - ./nats-server-1.conf:/etc/nats/nats-server.conf
+      - ./data/nats-1:/data/jetstream
+      - ./nats-1.log:/tmp/nats-server.log
+    ports:
+      - 4222:4222
+    networks:
+      - nats_network
+    environment:
+     - GOMEMLIMIT=500MiB
+
+  nats-2:
+    image: nats:latest
+    container_name: nats-2
+    command: -c /etc/nats/nats-server.conf 
+    volumes:
+      - ./nats-server-2.conf:/etc/nats/nats-server.conf
+      - ./data/nats-2:/data/jetstream
+      - ./nats-2.log:/tmp/nats-server.log
+    ports:
+      - 4223:4222
+    networks:
+      - nats_network
+    environment:
+      - GOMEMLIMIT=500MiB
+
+  nats-3:
+    image: nats:latest
+    container_name: nats-3
+    command: -c /etc/nats/nats-server.conf 
+    volumes:
+      - ./nats-server-3.conf:/etc/nats/nats-server.conf
+      - ./data/nats-3:/data/jetstream
+      - ./nats-3.log:/tmp/nats-server.log
+    ports:
+      - 4224:4222
+    networks:
+      - nats_network
+    environment:
+      - GOMEMLIMIT=500MiB
+
+  nats-dlq:
+    image: nats:latest
+    container_name: nats-dlq
+    command: -c /etc/nats/nats-server.conf 
+    volumes:
+      - ./nats-server-dlq.conf:/etc/nats/nats-server.conf
+      - ./data/nats-dlq:/data/jetstream
+      - ./nats-dlq.log:/tmp/nats-server.log  
+    ports:
+      - 4225:4222
+    networks:
+      - nats_network
+    environment:
+      - GOMEMLIMIT=500MiB
+
+  nats-exporter:
+    image: natsio/prometheus-nats-exporter:latest
+    container_name: nats-exporter
+    command: "-use_internal_server_name -l /tmp/prometheus-nats-exporter.log -p 7778 -varz -subz -routez -leafz -jsz all -healthz -gatewayz -accstatz -connz_detailed http://nats-1:8222"
+    ports:
+      - "7778:7778"
+    networks:
+      - nats_network
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+      - nats-dlq
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - nats_network
+    depends_on:
+      - nats-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - nats_network
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  nats_network:
+    driver: bridge
